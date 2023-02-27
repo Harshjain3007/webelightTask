@@ -8,6 +8,7 @@ try{
     const data=req.body
     const customerId=req.params.customerId
     let { cartId } = data
+   
     if(!cartId) return res.status(400).send({status:false,message:'please enter CartId'})
     let checkCartId = await cartmodel.findById(cartId).select({ _id: 0, createdAt: 0, updatedAt: 0 })
         if (!checkCartId) return res.status(404).send({ status: false, message: 'cartId not found' })
@@ -24,11 +25,6 @@ try{
             return res.status(404).send({status:false,message:'Please add balance to your wallet or reduce some items from cart'})
         }
 
-        
-        
-
-
-        
         let enterData = checkCartId.toObject()
         enterData.totalQuantity = 0
         items.map(x => enterData.totalQuantity += x.quantity)
@@ -45,20 +41,29 @@ try{
 
 
 const getOrderhistory =async function(req,res){
+    try {
+      
+       let customerId = req.params.customerId 
     let orderDetails = req.query
-    let {totalPrice,OrderedAt,OrderdBefore,OrderedAfter}  = orderDetails
+    let {totalPrice,OrderedAt,OrderSort,OrderdBefore,OrderedAfter}  = orderDetails
+ 
+   OrderSort=parseInt(OrderSort)
 
 if(OrderdBefore){
         orderDetails.OrderedAt={$lt:orderDetails.OrderdBefore}
     }
     if(OrderedAfter){
-        orderDetails.OrderedAt={$gt:productdetails.pricegreaterthan}
+        orderDetails.OrderedAt={$gt:orderDetails.OrderedAfter}
     }
 
-    let orderHistory = await ordermodel.find(orderDetails).sort({price:priceSort})
-
+    let orderHistory = await ordermodel.find(orderDetails).sort({OrderedAt:OrderSort})
+    return res.status(200).send({status:true,orderDetails:orderHistory})
+    }catch(error){
+        return res.status(500).send({ status: false, message: error.message })
+    }
  }
 
 
 
 module.exports.createOrder = createOrder
+module.exports.getOrderhistory=getOrderhistory

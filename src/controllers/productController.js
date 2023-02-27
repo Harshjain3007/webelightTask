@@ -5,13 +5,17 @@ const productmodel = require('../Models/productModel')
 
 
 const createProduct = async function(req,res){
+    try{
     let data =req.body
     let saveddata=await productmodel.create(data)
     return res.status(201).send({status:true,data:saveddata})
+}catch(error){
+    return  res.status(500).send({status:false,message:error.message})
+}
 }
 
-
 const getProductslist = async function(req,res){
+    try{
     let productdetails = req.query
     let {category,price,priceSort,pricelessthan,pricegreaterthan,page,limit} = productdetails
     priceSort=parseInt(priceSort)
@@ -26,10 +30,14 @@ const getProductslist = async function(req,res){
     let productData = await productmodel.find(productdetails).sort({price:priceSort}).limit(limit).skip(skip)
     TotalProductCount = productData.length
     return res.status(200).send({status:true,productdetails:productData,TotalProductCount})
+}catch(error){
+       return res.status(500).send({status:false,message:error.message})
+    }
 }
 
 
 const updateProductDetails = async function(req,res){
+    try{
     const productId=req.params.productId 
 
      let updateProductDetails = req.body
@@ -40,9 +48,13 @@ const updateProductDetails = async function(req,res){
     updateProductDetails._id=productId
     const updateDetails = await productmodel.findOneAndUpdate({_id:productId,isDeleted:false},updateProductDetails,{new:true})
     return res.status(200).send({status:true,message:'product updated successfully',updateDetails:updateProductDetails})
+    }catch(error){
+        return res.status(500).send({status:false,message:error.message})
+    }
 }
 
 const deleteProduct = async function(req,res){
+    try{
      let productId = req.params.productId
 
      if (!ObjectId.isValid(productId)) {
@@ -54,6 +66,9 @@ const deleteProduct = async function(req,res){
 
      await productmodel.findOneAndUpdate({_id:productId,isDeleted:false},{$set:{isDeleted:true}},{new:true})
      res.status(200).send({status:true,message:'product deleted successfully'})
+    }catch(error){
+        return res.status(500).send({status:false,message:error.message})
+    }
 }
 
 

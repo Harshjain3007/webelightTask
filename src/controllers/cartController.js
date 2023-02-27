@@ -75,6 +75,7 @@ const getCart = async function(req,res){
 
 
 const updateCart=async function(req,res){
+    try{
     let customerId=req.params.customerId
     let data =req.body
   let {productId,cartId,removeProduct} =data
@@ -107,15 +108,22 @@ const updateCart=async function(req,res){
            }
         }
     }
+}catch(error){
+    return res.status(500).send({status:false,message:error.message})
+}
 }
 
 
 const deleteCart=async function(req,res){
+    try{
     let customerId=req.params.customerId
     let findCart = await cartmodel.findOne({customerId})
     if(!findCart) return res.status(404).send({status:false,message:'no such cart exist'})
     const deleteCart=await cartmodel.findOneAndUpdate({_id:findCart._id},{items:[],totalPrice:0,totalItems:0},{new:true})
     return res.status(404).send({status:false,msg:'cart deleted successfully',data:deleteCart})
+    }catch(error){
+        return res.status(500).send({status:false,message:error.message})
+    }
 }
 
 
